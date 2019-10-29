@@ -6,7 +6,7 @@
 
 class Course {
 public:
-    Course(const std::string &name, std::uint8_t credits);
+    Course(std::string name, std::uint8_t credits);
 
     const std::string &get_name() const;
 

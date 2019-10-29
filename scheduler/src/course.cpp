@@ -3,7 +3,8 @@
 
 #include "course.hpp"
 
-Course::Course(const std::string &name) : name(name) {
+Course::Course(std::string name, std::uint8_t credits)
+        : name(name), credits(credits) {
 }
 
 const std::string &Course::get_name() const {
