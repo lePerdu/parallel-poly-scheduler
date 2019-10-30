@@ -1,6 +1,9 @@
 # Parallel and Distributed Computing Project
 
-MPICXX ?= mpicxx
+# We use C++11
+CXXFLAGS += -std=c++11
+
+MPICXX ?= mpiCC
 
 # MPI-specific flags
 MPI_CXXFLAGS ?=
