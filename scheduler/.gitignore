@@ -1,4 +1,7 @@
 # .gitignore
 
 build/
+bin/
 compile_commands.json
+
+.clangd/
