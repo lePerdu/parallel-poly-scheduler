@@ -1,7 +1,8 @@
 #include <iostream>
 #include <mpi.h>
+#include <nlohmann/json.hpp>
 
-int main(int argc, char *argv[]) {
+int main(int argc, char* argv[]) {
     MPI::Init(argc, argv);
 
     const auto node_count = MPI::COMM_WORLD.Get_size();

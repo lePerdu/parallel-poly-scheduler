@@ -4,15 +4,14 @@
 /// ClassTime
 ///
 
-ClassTime::ClassTime(Day day, Time start, Time end)
-        : day(day), start(start), end(end) {
-}
+ClassTime::ClassTime(Day day, Time start, Time end) :
+    day(day), start(start), end(end) {}
 
-bool ClassTime::overlaps(const ClassTime &other) const {
+bool ClassTime::overlaps(const ClassTime& other) const {
     return day == other.day && start < other.end && end >= other.start;
 }
 
-bool ClassTime::operator==(const ClassTime &other) const {
+bool ClassTime::operator==(const ClassTime& other) const {
     return day == other.day && start == other.start && end == other.end;
 }
 
@@ -28,17 +27,14 @@ ClassTime ClassTime::offset(Time time) const {
 /// ClassLayout
 ///
 
-ClassLayout::ClassLayout() {
-}
+ClassLayout::ClassLayout() {}
 
-ClassLayout::ClassLayout(std::vector<ClassTime> times) : times(times) {
-}
+ClassLayout::ClassLayout(std::vector<ClassTime> times) : times(times) {}
 
-ClassLayout::ClassLayout(std::initializer_list<ClassTime> times)
-        : times(times) {
-}
+ClassLayout::ClassLayout(std::initializer_list<ClassTime> times) :
+    times(times) {}
 
-const std::vector<ClassTime> &ClassLayout::get_times() const {
+const std::vector<ClassTime>& ClassLayout::get_times() const {
     return times;
 }
 
@@ -46,9 +42,9 @@ bool ClassLayout::empty() const {
     return times.empty();
 }
 
-bool ClassLayout::overlaps(const ClassLayout &other) const {
-    for (const auto &time : times) {
-        for (const auto &other_time : other.times) {
+bool ClassLayout::overlaps(const ClassLayout& other) const {
+    for (const auto& time : times) {
+        for (const auto& other_time : other.times) {
             if (time.overlaps(other_time)) {
                 return true;
             }
@@ -59,7 +55,7 @@ bool ClassLayout::overlaps(const ClassLayout &other) const {
 }
 
 bool ClassLayout::contained_in(Time start, Time end) const {
-    for (auto &time : times) {
+    for (auto& time : times) {
         if (time.start < start || end < time.end) {
             return false;
         }
@@ -69,12 +65,12 @@ bool ClassLayout::contained_in(Time start, Time end) const {
 }
 
 void ClassLayout::offset(Time shift) {
-    for (auto &time : times) {
+    for (auto& time : times) {
         time = time.offset(shift);
     }
 }
 
-bool ClassLayout::operator==(const ClassLayout &other) const {
+bool ClassLayout::operator==(const ClassLayout& other) const {
     return times == other.times;
 }
 
@@ -83,9 +79,8 @@ bool ClassLayout::operator==(const ClassLayout &other) const {
 ///
 
 ClassLayoutGenerator::ClassLayoutGenerator(
-        std::uint8_t credits, Time start, Time end)
-        : credits(credits), start_time(start), end_time(end) {
-}
+        std::uint8_t credits, Time start, Time end) :
+    credits(credits), start_time(start), end_time(end) {}
 
 // Alias for less typing
 using Iterator = ClassLayoutGenerator::Iterator;
@@ -132,7 +127,7 @@ const ClassLayout BASE_LAYOUTS_4[] = {
         {},
 };
 
-static const ClassLayout *credit_base_layouts(std::uint8_t credits) {
+static const ClassLayout* credit_base_layouts(std::uint8_t credits) {
     switch (credits) {
     case 1:
         return BASE_LAYOUTS_1;
@@ -145,23 +140,23 @@ static const ClassLayout *credit_base_layouts(std::uint8_t credits) {
     }
 }
 
-Iterator::Iterator(const ClassLayoutGenerator *generator, bool end)
-        : generator(generator) {
+Iterator::Iterator(const ClassLayoutGenerator* generator, bool end) :
+    generator(generator) {
     // Use empty layout if at end
     current_base = credit_base_layouts(end ? 0 : generator->credits);
     current = *current_base;
     current.offset(generator->start_time);
 }
 
-const ClassLayout &Iterator::operator*() const {
+const ClassLayout& Iterator::operator*() const {
     return current;
 }
 
-const ClassLayout *Iterator::operator->() const {
+const ClassLayout* Iterator::operator->() const {
     return &current;
 }
 
-Iterator &Iterator::operator++() {
+Iterator& Iterator::operator++() {
     if (current.empty()) {
         return *this;
     }
@@ -183,10 +178,10 @@ Iterator Iterator::operator++(int) {
     return orig;
 }
 
-bool Iterator::operator==(const Iterator &other) const {
+bool Iterator::operator==(const Iterator& other) const {
     return generator == other.generator && current == other.current;
 }
 
-bool Iterator::operator!=(const Iterator &other) const {
+bool Iterator::operator!=(const Iterator& other) const {
     return !(*this == other);
 }

@@ -1,11 +1,11 @@
 #ifndef SCHEDULE_HPP_
 #define SCHEDULE_HPP_
 
-#include <map>
-#include <vector>
-
 #include "course.hpp"
 #include "section.hpp"
+
+#include <map>
+#include <vector>
 
 class Schedule {
 public:
@@ -16,7 +16,7 @@ public:
      * new sections will be created. All of the sections the student is added to
      * will be non-overlapping.
      */
-    void merge_student_courses(std::vector<const Course *> courses);
+    void merge_student_courses(std::vector<const Course*> courses);
 
 private:
     /**
@@ -32,14 +32,14 @@ private:
      *
      * \return A pointer to the section that was picked / added.
      */
-    const Section *pick_or_add_section(
-            const Course *course,
-            const std::vector<const Section *> &registered);
+    const Section* pick_or_add_section(
+            const Course* course,
+            const std::vector<const Section*>& registered);
 
     /**
      * Sections in the schedule, keyed by the course.
      */
-    std::multimap<const Course *, Section> sections;
+    std::multimap<const Course*, Section> sections;
 };
 
 #endif /* SCHEDULE_HPP_ */

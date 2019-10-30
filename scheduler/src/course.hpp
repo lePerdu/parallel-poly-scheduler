@@ -8,16 +8,16 @@ class Course {
 public:
     Course(std::string name, std::uint8_t credits);
 
-    const std::string &get_name() const;
+    const std::string& get_name() const;
 
-    void add_prereq(const Course *prereq);
+    void add_prereq(const Course* prereq);
 
-    bool has_prereq(const Course *prereq) const;
+    bool has_prereq(const Course* prereq) const;
 
 private:
     std::string name;
     std::uint8_t credits;
-    std::vector<const Course *> prereqs;
+    std::vector<const Course*> prereqs;
 };
 
 #endif // COURSE_HPP_

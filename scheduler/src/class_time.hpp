@@ -23,9 +23,9 @@ struct ClassTime {
 
     ClassTime(Day day, Time start, Time end);
 
-    bool overlaps(const ClassTime &other) const;
+    bool overlaps(const ClassTime& other) const;
 
-    bool operator==(const ClassTime &other) const;
+    bool operator==(const ClassTime& other) const;
 
     /**
      * Creates a class time of the same length immediately after this one.
@@ -44,17 +44,17 @@ public:
     ClassLayout(std::initializer_list<ClassTime> times);
     ClassLayout(std::vector<ClassTime> times);
 
-    const std::vector<ClassTime> &get_times() const;
+    const std::vector<ClassTime>& get_times() const;
 
     bool empty() const;
 
-    bool overlaps(const ClassLayout &other) const;
+    bool overlaps(const ClassLayout& other) const;
 
     bool contained_in(Time start, Time end) const;
 
     void offset(Time shift);
 
-    bool operator==(const ClassLayout &other) const;
+    bool operator==(const ClassLayout& other) const;
 
 private:
     std::vector<ClassTime> times;
@@ -72,23 +72,23 @@ public:
 
     class Iterator {
     public:
-        Iterator(const ClassLayoutGenerator *generator, bool end = false);
+        Iterator(const ClassLayoutGenerator* generator, bool end = false);
 
         /**
          * Refrence to the current layout.
          */
-        const ClassLayout &operator*() const;
-        const ClassLayout *operator->() const;
+        const ClassLayout& operator*() const;
+        const ClassLayout* operator->() const;
 
-        Iterator &operator++();
+        Iterator& operator++();
         Iterator operator++(int);
 
-        bool operator==(const Iterator &other) const;
-        bool operator!=(const Iterator &other) const;
+        bool operator==(const Iterator& other) const;
+        bool operator!=(const Iterator& other) const;
 
     private:
-        const ClassLayoutGenerator *generator;
-        const ClassLayout *current_base;
+        const ClassLayoutGenerator* generator;
+        const ClassLayout* current_base;
         ClassLayout current;
     };
 
