@@ -1,22 +1,22 @@
-#ifndef PARSEJSON_HPP_
-#define PARSEJSON_HPP_
+#ifndef PARSE_JSON_HPP_
+#define PARSE_JSON_HPP_
 
+#include "course.cpp"
+
+#include <fstream>
 #include <iostream>
 #include <nlohmann/json.hpp>
 #include <string>
-#include "course.cpp"
 #include <vector>
-#include <fstream>
 
-
-/*  Parses a JSON file into a vector of courses */
-class ParseJson{
+/* Parses a JSON file into a vector of courses */
+class ParseJson {
 public:
-    ParseJson(std::string& fileName);
-    std::vector<Course>& get_course_list();
+    ParseJson(const std::string& fileName);
+    const std::vector<Course>& get_course_list() const;
 
 private:
-    std::vector<Course> courseList;
+    std::vector<Course> course_list;
 };
 
-#endif // PARSEJSON_HPP_
+#endif // PARSE_JSON_HPP_
