@@ -1,5 +1,9 @@
 #include "class_time.hpp"
 
+#include <random>
+#include <unordered_map>
+#include <utility>
+
 ///
 /// ClassTime
 ///
@@ -93,6 +97,15 @@ Iterator ClassLayoutGenerator::end() const {
     return Iterator(this, true);
 }
 
+bool ClassLayoutGenerator::operator==(const ClassLayoutGenerator& other) const {
+    return credits == other.credits && start_time == other.start_time &&
+           end_time == other.end_time;
+}
+
+bool ClassLayoutGenerator::operator!=(const ClassLayoutGenerator& other) const {
+    return !(*this == other);
+}
+
 // Preset templates for each class layout
 
 //  Just an empty layout
@@ -184,4 +197,48 @@ bool Iterator::operator==(const Iterator& other) const {
 
 bool Iterator::operator!=(const Iterator& other) const {
     return !(*this == other);
+}
+
+///
+/// ClassLayoutGenerator cache
+///
+
+/**
+ * Get a vecctor of all layouts for each credit for more efficient lookups.
+ */
+static std::vector<ClassLayout>
+generate_all_layouts(ClassLayoutGenerator generator) {
+    return {generator.begin(), generator.end()};
+}
+
+static std::unordered_map<ClassLayoutGenerator, std::vector<ClassLayout>>
+        class_layout_cache;
+
+const std::vector<ClassLayout>&
+all_class_layouts(std::uint8_t credits, Time start_time, Time end_time) {
+    ClassLayoutGenerator gen(credits, start_time, end_time);
+    auto it = class_layout_cache.find(gen);
+    if (it == class_layout_cache.end()) {
+        // returns pair of (iterator, bool)
+        auto res = class_layout_cache.insert({gen, generate_all_layouts(gen)});
+        it = std::get<0>(res);
+    }
+
+    return std::get<1>(*it);
+}
+
+const ClassLayout&
+random_class_layout(std::uint8_t credits, Time start_time, Time end_time) {
+    auto all_layouts = all_class_layouts(credits, start_time, end_time);
+    if (all_layouts.empty()) {
+        // Empty layout
+        return BASE_LAYOUTS_OTHER[0];
+    }
+
+    // This seems like an awful lot of code just to get a single random integer
+    std::random_device rd;
+    std::default_random_engine rng(rd());
+    std::uniform_int_distribution<int> distribution(0, all_layouts.size() - 1);
+
+    return all_layouts[distribution(rng)];
 }
