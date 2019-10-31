@@ -1,7 +1,7 @@
 #ifndef PARSE_JSON_HPP_
 #define PARSE_JSON_HPP_
 
-#include "course.cpp"
+#include "course.hpp"
 
 #include <fstream>
 #include <iostream>
