@@ -2,6 +2,7 @@
 #include "course.hpp"
 
 #include <algorithm>
+#include <iostream>
 
 Course::Course(std::string name, std::uint8_t credits) :
     name(name), credits(credits) {}
@@ -16,4 +17,10 @@ void Course::add_prereq(const Course* prereq) {
 
 bool Course::has_prereq(const Course* prereq) const {
     return std::find(prereqs.begin(), prereqs.end(), prereq) != prereqs.end();
+}
+
+void Course::print_course() const {
+    std::cout << "Course Title: [" << name.c_str() << "]"
+              << "\t"
+              << "Credits: [" << credits << "]" << std::endl;
 }
