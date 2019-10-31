@@ -19,7 +19,7 @@ bool Course::has_prereq(const Course* prereq) const {
     return std::find(prereqs.begin(), prereqs.end(), prereq) != prereqs.end();
 }
 
-void Course::print_course() {
+void Course::print_course() const {
     std::cout << "Course Title: [" << name.c_str() << "]"
               << "\t"
               << "Credits: [" << credits << "]" << std::endl;

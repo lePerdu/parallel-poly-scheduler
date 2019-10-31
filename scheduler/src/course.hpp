@@ -10,7 +10,7 @@ public:
     const std::string& get_name() const;
     void add_prereq(const Course* prereq);
     bool has_prereq(const Course* prereq) const;
-    void print_course();
+    void print_course() const;
 
 private:
     std::string name;
