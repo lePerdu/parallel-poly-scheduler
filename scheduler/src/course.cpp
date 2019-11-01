@@ -11,6 +11,10 @@ const std::string& Course::get_name() const {
     return name;
 }
 
+std::uint8_t Course::get_credits() const {
+    return credits;
+}
+
 void Course::add_prereq(const Course* prereq) {
     prereqs.push_back(prereq);
 }

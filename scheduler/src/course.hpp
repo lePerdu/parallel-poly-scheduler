@@ -8,6 +8,7 @@ class Course {
 public:
     Course(std::string name, std::uint8_t credits);
     const std::string& get_name() const;
+    std::uint8_t get_credits() const;
     void add_prereq(const Course* prereq);
     bool has_prereq(const Course* prereq) const;
     void print_course() const;
