@@ -27,6 +27,8 @@ TARGET := $(BIN)/parallel_scheduler
 SOURCES := $(wildcard $(SRC)/*.cpp)
 OBJECTS := $(patsubst $(SRC)/%.cpp,$(BUILD)/%.o,$(SOURCES))
 
+CLANG_FORMAT := clang-format
+
 all: $(TARGET)
 
 $(TARGET): $(OBJECTS) | $(BIN)
