@@ -6,21 +6,22 @@
 
 #include <vector>
 
-class Section {
-public:
-    Section(const Course* course, int number, ClassLayout layout);
-
+struct Section {
     /**
-     * Test for equality using the course and the number.
-     * The class layout is not checked, for better performance.
+     * TODO Use some form of ID instead of pointers for easier transport between
+     * MPI nodes?
      */
-    bool operator==(const Section& other) const;
-    bool operator!=(const Section& other) const;
-
-private:
     const Course* course;
-    int number;
     ClassLayout layout;
+
+    Section(const Course* course, ClassLayout layout);
+
+    bool overlaps(const Section& other) const;
+
+    // TODO Remove these?
+
+    // bool operator==(const Section& other) const;
+    // bool operator!=(const Section& other) const;
 };
 
 #endif // SECTION_HPP_
