@@ -2,7 +2,6 @@
 
 #include <random>
 #include <unordered_map>
-#include <utility>
 
 ///
 /// ClassTime
@@ -199,6 +198,15 @@ bool Iterator::operator!=(const Iterator& other) const {
     return !(*this == other);
 }
 
+std::size_t std::hash<ClassLayoutGenerator>::operator()(
+        const ClassLayoutGenerator& gen) const {
+    std::size_t res = 17;
+    res = res * 31 + std::hash<std::uint8_t>()(gen.credits);
+    res = res * 31 + std::hash<Time>()(gen.start_time);
+    res = res * 31 + std::hash<Time>()(gen.end_time);
+    return res;
+}
+
 ///
 /// ClassLayoutGenerator cache
 ///
@@ -211,6 +219,9 @@ generate_all_layouts(ClassLayoutGenerator generator) {
     return {generator.begin(), generator.end()};
 }
 
+/**
+ * Global cache of layouts, indexed by the configuration.
+ */
 static std::unordered_map<ClassLayoutGenerator, std::vector<ClassLayout>>
         class_layout_cache;
 
@@ -219,12 +230,14 @@ all_class_layouts(std::uint8_t credits, Time start_time, Time end_time) {
     ClassLayoutGenerator gen(credits, start_time, end_time);
     auto it = class_layout_cache.find(gen);
     if (it == class_layout_cache.end()) {
-        // returns pair of (iterator, bool)
-        auto res = class_layout_cache.insert({gen, generate_all_layouts(gen)});
-        it = std::get<0>(res);
+        // returns pair of (iterator to element, whether it was inserted)
+        // We already checked that the element doesn't exist, so the new list
+        // was inserted.
+        it = class_layout_cache.insert({gen, generate_all_layouts(gen)}).first;
     }
 
-    return std::get<1>(*it);
+    // Return the value
+    return it->second;
 }
 
 const ClassLayout&

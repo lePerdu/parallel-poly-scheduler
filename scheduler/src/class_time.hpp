@@ -66,6 +66,10 @@ private:
  *
  * The order of the layouts is unspecified.
  * For now, this is only defined for 1-, 3-, and 4-credit hours courses.
+ *
+ * TODO Move this to the source file so that it is not used?
+ * all_class_layouts() and random_class_layout() cache results and so are
+ * (I hope?) much more efficient, especially if a random layout is needed.
  */
 class ClassLayoutGenerator {
 public:
@@ -110,32 +114,19 @@ private:
     Time end_time;
 };
 
-/**
- * Implement std::hash so that ClassLayoutGenerator can be used in
- * std::unordered_map.
- * TODO Also implement operator< so that can be used in map to compare
- * performance.
- */
+// Required for using ClassLayoutGenerator as a key in a hash map
+
 template <>
 struct std::hash<ClassLayoutGenerator> {
-    std::size_t operator()(const ClassLayoutGenerator& value) const {
-        std::size_t res = 17;
-        res = res * 31 + std::hash<std::uint8_t>()(value.credits);
-        res = res * 31 + std::hash<Time>()(value.start_time);
-        res = res * 31 + std::hash<Time>()(value.end_time);
-        return res;
-    }
+    std::size_t operator()(const ClassLayoutGenerator& gen) const;
 };
 
 /**
- * Generates a vector of all class layouts for a given configuration.
+ * Returns a vector of all class layouts for a given configuration.
  *
- * This utilizes a global cache keyed by the number of credits, start time, and
- * end time; values in the cache are just vectors of class layouts, so this is
- * just a hash lookup after the first call.
- *
- * TODO Move ClassLayoutGenerator to the source file so that it isn't used from
- * the outside?
+ * This function is memoized by the configuration, so it will be a simple map
+ * lookup after the first time.
+>>>>>>> Stashed changes
  */
 const std::vector<ClassLayout>&
 all_class_layouts(std::uint8_t credits, Time start_time, Time end_time);
@@ -145,6 +136,9 @@ all_class_layouts(std::uint8_t credits, Time start_time, Time end_time);
  *
  * If there are no known layouts for the configuration, this will return an
  * empty class layout.
+ *
+ * This uses the caching from all_class_layouts(), so it will just be a map
+ * lookup and a vector lookup after the first time.
  */
 const ClassLayout&
 random_class_layout(std::uint8_t credits, Time start_time, Time end_time);
