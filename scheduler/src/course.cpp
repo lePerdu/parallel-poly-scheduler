@@ -24,7 +24,8 @@ bool Course::has_prereq(const Course* prereq) const {
 }
 
 void Course::print_course() const {
-    std::cout << "Course Title: [" << name.c_str() << "]"
+    std::cout << "Course Title: [" << name << "]"
               << "\t"
-              << "Credits: [" << credits << "]" << std::endl;
+              << "Credits: [" << static_cast<unsigned>(credits) << "]"
+              << std::endl;
 }
