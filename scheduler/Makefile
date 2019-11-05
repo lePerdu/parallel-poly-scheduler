@@ -29,6 +29,12 @@ OBJECTS := $(patsubst $(SRC)/%.cpp,$(BUILD)/%.o,$(SOURCES))
 
 CLANG_FORMAT := clang-format
 
+ifdef PRODUCTION
+CXXFLAGS += -DNDEBUG -O3
+else
+CXXFLAGS += -g -Og
+endif
+
 all: $(TARGET)
 
 $(TARGET): $(OBJECTS) | $(BIN)
