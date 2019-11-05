@@ -1,7 +1,10 @@
 # Parallel and Distributed Computing Project
 
 # We use C++11
-override CXXFLAGS += -std=c++11 -Wall
+LOCAL_CXXFLAGS := -std=c++11
+
+# Default warnings
+CXXFLAGS ?= -Wall
 
 MPICXX ?= mpiCC
 
@@ -10,12 +13,19 @@ MPI_CXXFLAGS ?=
 MPI_LDFLAGS ?=
 
 # Combine them for simplicity
-CXXFLAGS += $(MPI_CXXFLAGS)
-LDFLAGS += $(MPI_LDFLAGS)
+LOCAL_CXXFLAGS += $(MPI_CXXFLAGS)
+LOCAL_LDFLAGS += $(MPI_LDFLAGS)
+
+ifdef PRODUCTION
+# Turn off asserts and turn on optimizations
+LOCAL_CXXFLAGS += -DNDEBUG -O3
+else
+LOCAL_CXXFLAGS += -g -Og
+endif
 
 # JSON library includes
 NLOHMANN_JSON := nlohmann_json
-CXXFLAGS += -I$(NLOHMANN_JSON)/single_include
+LOCAL_CXXFLAGS += -I$(NLOHMANN_JSON)/single_include
 
 SRC := src
 BUILD := build
@@ -29,19 +39,13 @@ OBJECTS := $(patsubst $(SRC)/%.cpp,$(BUILD)/%.o,$(SOURCES))
 
 CLANG_FORMAT := clang-format
 
-ifdef PRODUCTION
-CXXFLAGS += -DNDEBUG -O3
-else
-CXXFLAGS += -g -Og
-endif
-
 all: $(TARGET)
 
 $(TARGET): $(OBJECTS) | $(BIN)
-	$(MPICXX) $(LDFLAGS) -o $@ $^
+	$(MPICXX) $(LOCAL_LDFLAGS) $(LDFLAGS) -o $@ $^
 
 $(BUILD)/%.o: $(SRC)/%.cpp | $(BUILD)
-	$(MPICXX) $(CXXFLAGS) -MMD -c -o $@ $<
+	$(MPICXX) $(LOCAL_CXXFLAGS) $(CXXFLAGS) -MMD -c -o $@ $<
 
 $(BUILD):
 	@mkdir -p $@
