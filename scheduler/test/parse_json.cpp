@@ -1,15 +1,16 @@
-#include "parse_json.cpp"
+#include "parse_json.hpp"
 
 #include <iostream>
 #include <string>
 
 /* File used to test the ParseJSON class */
 
+static const char* FILE_NAME = "data/cs_major_courses.json";
+
 int main(int argc, char* argv[]) {
     std::vector<Course> courseList;
 
-    std::string fileName = "cs_major_courses.json";
-    ParseJson parseMajor(fileName);
+    ParseJson parseMajor(FILE_NAME);
     courseList = parseMajor.get_course_list();
 
     for (int i = 0; i < courseList.size(); i++) {

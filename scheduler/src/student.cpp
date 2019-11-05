@@ -40,7 +40,8 @@ static Student generate_taken_courses(
     // Most courses have 3 credits, so max_assigned_credits / 3 is a good
     // estimate for how large the vector will get (it can still grow if it
     // needs to)
-    std::vector<const Course*> taken_courses(max_assigned_credits / 3);
+    std::vector<const Course*> taken_courses;
+    taken_courses.reserve(max_assigned_credits / 3);
 
     while (taken_credits <= max_assigned_credits) {
         auto chosen_course =
@@ -51,7 +52,7 @@ static Student generate_taken_courses(
         if (std::find(
                     taken_courses.begin(),
                     taken_courses.end(),
-                    chosen_course) != taken_courses.end()) {
+                    chosen_course) == taken_courses.end()) {
             taken_credits += chosen_course->get_credits();
             taken_courses.push_back(chosen_course);
         }
