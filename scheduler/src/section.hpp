@@ -22,6 +22,11 @@ struct Section {
 
     // bool operator==(const Section& other) const;
     // bool operator!=(const Section& other) const;
+
+    /**
+     * Prints a section in a somewhat-human-readable format.
+     */
+    void print() const;
 };
 
 #endif // SECTION_HPP_

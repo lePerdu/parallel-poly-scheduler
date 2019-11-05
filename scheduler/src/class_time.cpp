@@ -1,5 +1,6 @@
 #include "class_time.hpp"
 
+#include <iostream>
 #include <random>
 #include <unordered_map>
 
@@ -24,6 +25,31 @@ ClassTime ClassTime::next_slot() const {
 
 ClassTime ClassTime::offset(Time time) const {
     return ClassTime(day, start + time, end + time);
+}
+
+void ClassTime::print() const {
+    switch (day) {
+    case Day::MONDAY:
+        std::cout << "Monday";
+        break;
+    case Day::TUESDAY:
+        std::cout << "Tuesday";
+        break;
+    case Day::WEDNESDAY:
+        std::cout << "Wednesday";
+        break;
+    case Day::THURSDAY:
+        std::cout << "Thursday";
+        break;
+    case Day::FRIDAY:
+        std::cout << "Friday";
+        break;
+    default:
+        return;
+    }
+
+    std::cout << ": " << static_cast<unsigned>(start) << " - "
+              << static_cast<unsigned>(end) << std::endl;
 }
 
 ///
@@ -240,7 +266,7 @@ all_class_layouts(std::uint8_t credits, Time start_time, Time end_time) {
     return it->second;
 }
 
-const ClassLayout&
+ClassLayout
 random_class_layout(std::uint8_t credits, Time start_time, Time end_time) {
     auto all_layouts = all_class_layouts(credits, start_time, end_time);
     if (all_layouts.empty()) {
@@ -253,5 +279,14 @@ random_class_layout(std::uint8_t credits, Time start_time, Time end_time) {
     std::default_random_engine rng(rd());
     std::uniform_int_distribution<int> distribution(0, all_layouts.size() - 1);
 
-    return all_layouts[distribution(rng)];
+    auto& l = all_layouts.at(distribution(rng));
+    std::cerr << "Found layout" << std::endl;
+    for (auto& t : l.get_times()) {
+        std::cerr << '\t';
+        t.print();
+    }
+    if (l.get_times().size() <= 0 || l.get_times().size() > 4) {
+        std::cerr << "Invalid layout" << std::endl;
+    }
+    return l;
 }

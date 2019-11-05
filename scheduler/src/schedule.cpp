@@ -3,6 +3,7 @@
 #include "class_time.hpp"
 
 #include <cassert>
+#include <iostream>
 #include <iterator>
 #include <random>
 
@@ -52,7 +53,13 @@ Section Schedule::make_random_section(const Course* course) const {
 }
 
 void Schedule::add_random_section(const Course* course) {
-    sections.insert({course, make_random_section(course)});
+    auto s = make_random_section(course);
+    if (!s.layout.empty()) {
+        sections.insert({course, s});
+    } else {
+        std::cerr << "Empty layout for credits "
+                  << (unsigned)course->get_credits() << std::endl;
+    }
 }
 
 void Schedule::add_random_sections(const Course* course, std::size_t count) {
@@ -69,4 +76,10 @@ void Schedule::mutate() {
     auto it = sections.begin();
     std::advance(it, rand_section_idx(rng));
     it->second = make_random_section(it->second.course);
+}
+
+void Schedule::print() const {
+    for (auto& elem : sections) {
+        elem.second.print();
+    }
 }

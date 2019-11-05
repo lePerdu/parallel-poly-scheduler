@@ -34,6 +34,8 @@ struct ClassTime {
     ClassTime next_slot() const;
 
     ClassTime offset(Time shift) const;
+
+    void print() const;
 };
 
 /**
@@ -140,7 +142,7 @@ all_class_layouts(std::uint8_t credits, Time start_time, Time end_time);
  * This uses the caching from all_class_layouts(), so it will just be a map
  * lookup and a vector lookup after the first time.
  */
-const ClassLayout&
+ClassLayout
 random_class_layout(std::uint8_t credits, Time start_time, Time end_time);
 
 #endif // CLASS_TIME_HPP_

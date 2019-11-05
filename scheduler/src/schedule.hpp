@@ -73,6 +73,11 @@ public:
      */
     // void merge_student_courses(const std::vector<const Course*>& courses);
 
+    /**
+     * Prints a schedule in a somewhat-human-readable format.
+     */
+    void print() const;
+
 private:
     /**
      * Picks an existing section or adds a new one.
