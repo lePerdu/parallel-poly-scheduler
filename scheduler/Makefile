@@ -1,7 +1,7 @@
 # Parallel and Distributed Computing Project
 
 # We use C++11
-CXXFLAGS += -std=c++11
+CXXFLAGS += -std=c++11 -Wall
 
 MPICXX ?= mpiCC
 
