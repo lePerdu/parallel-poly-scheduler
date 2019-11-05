@@ -24,6 +24,17 @@ public:
             const std::vector<Section>& sections);
 
     /**
+     * Constructs a schedule as the cross-over between 2 parent schedules.
+     *
+     * The parents must have the same start and end times, as well as the same
+     * number of sections of each course.
+     *
+     * For each section, this randomly choses between the class layout of
+     * parent1 and parent2.
+     */
+    Schedule(const Schedule& parent1, const Schedule& parent2);
+
+    /**
      * An order multimap is used so that multiple ones can be iterated over in
      * "parallel" while pointing to the same courses (assuming they have the
      * same sets of courses and sections).
@@ -41,6 +52,15 @@ public:
      * Adds count sections of course at random times.
      */
     void add_random_sections(const Course* course, std::size_t count);
+
+    /**
+     * Mutates a single section in this schedule.
+     *
+     * TODO Take a probability parameter and potentially mutate multiple
+     * sections, or rely on the caller to decide when to mutate a schedule?
+     * The former is more "correct", but could be less performant.
+     */
+    void mutate();
 
     /**
      * Add a set of courses for a single student.
@@ -72,6 +92,8 @@ private:
     // const Section* pick_or_add_section(
     //         const Course* course,
     //         const std::vector<const Section*>& registered);
+
+    Section make_random_section(const Course* course) const;
 
     /**
      * Start and end time for all courses in the schedule.

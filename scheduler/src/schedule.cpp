@@ -2,6 +2,10 @@
 
 #include "class_time.hpp"
 
+#include <cassert>
+#include <iterator>
+#include <random>
+
 Schedule::Schedule(Time start, Time end) : start_time(start), end_time(end) {}
 
 Schedule::Schedule(Time start, Time end, const std::vector<Section>& sections) :
@@ -11,18 +15,58 @@ Schedule::Schedule(Time start, Time end, const std::vector<Section>& sections) :
     }
 }
 
+Schedule::Schedule(const Schedule& parent1, const Schedule& parent2) :
+    start_time(parent1.start_time), end_time(parent1.end_time) {
+    // These assertions are only run in "debug mode", when NDEBUG is not defined
+    // (see the Makefile)
+    assert(parent1.start_time == parent2.start_time);
+    assert(parent1.end_time == parent2.end_time);
+
+    std::random_device dev;
+    std::mt19937 rng(dev());
+    std::uniform_int_distribution<int> rand_parent(0, 1);
+
+    // Assume the parents have the same sections.
+    // Since a [ordered_]multimap is used, both iterators will have  the same
+    // order
+    auto end1 = parent1.sections.end();
+    auto end2 = parent2.sections.end();
+    for (auto it1 = parent1.sections.begin(), it2 = parent2.sections.begin();
+         it1 != end1 && it2 != end2;
+         ++it1, ++it2) {
+        // Make sure the invarient holds
+        assert(it1->first == it2->first);
+
+        sections.insert(rand_parent(rng) == 0 ? *it1 : *it2);
+    }
+}
+
 const Schedule::SectionContainer& Schedule::get_sections() const {
     return sections;
 }
 
-void Schedule::add_random_section(const Course* course) {
+Section Schedule::make_random_section(const Course* course) const {
     auto layout =
             random_class_layout(course->get_credits(), start_time, end_time);
-    sections.insert({course, Section(course, layout)});
+    return {course, layout};
+}
+
+void Schedule::add_random_section(const Course* course) {
+    sections.insert({course, make_random_section(course)});
 }
 
 void Schedule::add_random_sections(const Course* course, std::size_t count) {
     for (std::size_t i = 0; i < count; ++i) {
         add_random_section(course);
     }
+}
+
+void Schedule::mutate() {
+    std::random_device dev;
+    std::mt19937 rng(dev());
+    std::uniform_int_distribution<int> rand_section_idx(0, sections.size() - 1);
+
+    auto it = sections.begin();
+    std::advance(it, rand_section_idx(rng));
+    it->second = make_random_section(it->second.course);
 }
