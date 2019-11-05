@@ -128,7 +128,6 @@ struct std::hash<ClassLayoutGenerator> {
  *
  * This function is memoized by the configuration, so it will be a simple map
  * lookup after the first time.
->>>>>>> Stashed changes
  */
 const std::vector<ClassLayout>&
 all_class_layouts(std::uint8_t credits, Time start_time, Time end_time);
