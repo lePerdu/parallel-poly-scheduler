@@ -1,14 +1,20 @@
 #include <iostream>
 #include <mpi.h>
-#include <nlohmann/json.hpp>
+#include "node.cpp"
+
+void Create_Nodes(int& argc, char* argv[]);
+
+// Compiled using: mpic++ -o <outputfile> ./main.cpp
+// Run: mpirun -n <number of processors> ./<outputfile>
 
 int main(int argc, char* argv[]) {
-    MPI::Init(argc, argv);
+  //  Create the Nodes && start the work
+  MPI::Init(argc, argv);
 
-    const auto node_count = MPI::COMM_WORLD.Get_size();
-    const auto rank = MPI::COMM_WORLD.Get_rank();
+  int rank = rank = MPI::COMM_WORLD.Get_rank();
+  Node created_node(rank);
+  created_node.start_node_work();
 
-    std::cout << "Node " << rank << " of " << node_count << std::endl;
-
-    MPI::Finalize();
+  MPI_Barrier(MPI::COMM_WORLD);
+  MPI::Finalize();
 }
