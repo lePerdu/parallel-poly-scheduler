@@ -4,6 +4,8 @@
 
 static const char* FILE_NAME = "data/cs_major_courses.json";
 
+constexpr unsigned CLASS_CAPACITY = 30;
+
 int main(int argc, char* argv[]) {
     // Get a list of all courses available to cs majors
     ParseJson parsed_list(FILE_NAME);
@@ -22,12 +24,12 @@ int main(int argc, char* argv[]) {
     auto students = generate_random_students(500, course_pointers);
 
     // Schedule from 8AM to 6PM
-    Schedule schedule(8 * 2, 18 * 2);
-    for (auto& student : students) {
-        schedule.add_random_section(student.taken_courses[0]);
-    }
+    Schedule schedule(
+            8 * 2, 18 * 2, required_course_counts(CLASS_CAPACITY, students));
 
     schedule.print();
+
+    std::cout << "Score: " << schedule.fitness_score(students) << std::endl;
 
     return 0;
 }
