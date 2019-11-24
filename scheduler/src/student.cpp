@@ -9,7 +9,7 @@
  */
 static Student generate_taken_courses(
         std::uint16_t student_id,
-        const std::vector<const Course*>& available_courses) {
+        const std::vector<Course::Ref>& available_courses) {
     /* Random Number Generator that generates a better distribution than srand
      */
     std::random_device dev;
@@ -40,7 +40,7 @@ static Student generate_taken_courses(
     // Most courses have 3 credits, so max_assigned_credits / 3 is a good
     // estimate for how large the vector will get (it can still grow if it
     // needs to)
-    std::vector<const Course*> taken_courses;
+    std::vector<Course::Ref> taken_courses;
     taken_courses.reserve(max_assigned_credits / 3);
 
     while (taken_credits <= max_assigned_credits) {
@@ -63,7 +63,7 @@ static Student generate_taken_courses(
 
 std::vector<Student> generate_random_students(
         const std::uint16_t total_students,
-        const std::vector<const Course*>& available_courses) {
+        const std::vector<Course::Ref>& available_courses) {
     // Create a list of all students based on the inputted number of students
     std::vector<Student> students_list;
     for (std::uint16_t i = 0; i < total_students; i++) {

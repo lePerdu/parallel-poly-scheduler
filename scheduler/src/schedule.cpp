@@ -46,13 +46,13 @@ const Schedule::SectionContainer& Schedule::get_sections() const {
     return sections;
 }
 
-Section Schedule::make_random_section(const Course* course) const {
+Section Schedule::make_random_section(Course::Ref course) const {
     auto layout =
             random_class_layout(course->get_credits(), start_time, end_time);
     return {course, layout};
 }
 
-void Schedule::add_random_section(const Course* course) {
+void Schedule::add_random_section(Course::Ref course) {
     auto s = make_random_section(course);
     if (!s.layout.empty()) {
         sections.insert({course, s});
@@ -62,7 +62,7 @@ void Schedule::add_random_section(const Course* course) {
     }
 }
 
-void Schedule::add_random_sections(const Course* course, std::size_t count) {
+void Schedule::add_random_sections(Course::Ref course, std::size_t count) {
     for (std::size_t i = 0; i < count; ++i) {
         add_random_section(course);
     }

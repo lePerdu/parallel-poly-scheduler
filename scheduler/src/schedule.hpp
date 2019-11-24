@@ -39,19 +39,19 @@ public:
      * "parallel" while pointing to the same courses (assuming they have the
      * same sets of courses and sections).
      */
-    using SectionContainer = std::multimap<const Course*, Section>;
+    using SectionContainer = std::multimap<Course::Ref, Section>;
 
     const SectionContainer& get_sections() const;
 
     /**
      * Adds a section of course at a random time.
      */
-    void add_random_section(const Course* course);
+    void add_random_section(Course::Ref course);
 
     /**
      * Adds count sections of course at random times.
      */
-    void add_random_sections(const Course* course, std::size_t count);
+    void add_random_sections(Course::Ref course, std::size_t count);
 
     /**
      * Mutates a single section in this schedule.
@@ -71,7 +71,7 @@ public:
      *
      * TODO Remove?
      */
-    // void merge_student_courses(const std::vector<const Course*>& courses);
+    // void merge_student_courses(const std::vector<Course::Ref>& courses);
 
     /**
      * Prints a schedule in a somewhat-human-readable format.
@@ -95,10 +95,10 @@ private:
      * TODO Remove? This logic could be computed elsewhere
      */
     // const Section* pick_or_add_section(
-    //         const Course* course,
+    //         Course::Ref course,
     //         const std::vector<const Section*>& registered);
 
-    Section make_random_section(const Course* course) const;
+    Section make_random_section(Course::Ref course) const;
 
     /**
      * Start and end time for all courses in the schedule.

@@ -1,21 +1,18 @@
 #ifndef SETUP_HPP_
 #define SETUP_HPP_
 
+#include "course.hpp"
+#include "parse_json.hpp"
+#include "student.hpp"
+
 #include <iostream>
-#include <vector>
-#include <string>
 #include <mpi.h>
+#include <string>
+#include <vector>
 
-#include "parse_json.cpp"
-#include "student.cpp"
-#include "course.cpp"
+constexpr std::size_t TOTALSTUDENTS = 10;
 
-#define TOTALSTUDENTS 10
-
-void Setup(std::vector<Course>& available_courses, std::vector<const Course*>& course_pointers);
-void Extract_Courses(std::vector<Course>& available_courses, std::vector<const Course*>& course_pointers);
-
-//std::vector<Student> students;
+extern const char* FILE_NAME;
 
 /*
  * Parses the courses from the list of courses that a
@@ -23,20 +20,12 @@ void Extract_Courses(std::vector<Course>& available_courses, std::vector<const C
  * students with the courses that they have already taken
  */
 
-void Setup(std::vector<Course>& available_courses, std::vector<const Course*>& course_pointers){
-  Extract_Courses(available_courses, course_pointers);
-  //students = generate_random_students(TOTALSTUDENTS, course_pointers);
-}
+void setup(
+        std::vector<Course>& available_courses,
+        std::vector<Course::Ref>& course_pointers);
 
-void Extract_Courses(std::vector<Course>& available_courses, std::vector<const Course*>& course_pointers){
-  std::string FILE_NAME = "cs_major_courses.json";
-  std::cout << "Extracting Needed Course List From " << FILE_NAME << std::endl;
-  ParseJson parsed_list(FILE_NAME);
-  available_courses = parsed_list.get_course_list();
-  for (const auto& c : available_courses)
-      course_pointers.push_back(&c);
-  std::cout << "Done Extracting Course List" << std::endl;
-}
-
+void extract_courses(
+        std::vector<Course>& available_courses,
+        std::vector<Course::Ref>& course_pointers);
 
 #endif // SETUP_HPP_

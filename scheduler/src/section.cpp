@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-Section::Section(const Course* course, ClassLayout layout) :
+Section::Section(Course::Ref course, ClassLayout layout) :
     course(course), layout(layout) {}
 
 bool Section::overlaps(const Section& other) const {

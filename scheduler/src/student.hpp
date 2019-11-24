@@ -27,8 +27,7 @@
 constexpr size_t TOTAL_CREDITS_POSSIBLE = 120;
 
 struct Student {
-    Student(std::uint16_t student_id,
-            std::vector<const Course*> taken_courses) :
+    Student(std::uint16_t student_id, std::vector<Course::Ref> taken_courses) :
         student_id(student_id), taken_courses(taken_courses) {}
 
     /**
@@ -37,12 +36,12 @@ struct Student {
      * May be removed later.
      */
     std::uint16_t student_id;
-    std::vector<const Course*> taken_courses;
+    std::vector<Course::Ref> taken_courses;
 };
 
 std::vector<Student> generate_random_students(
         std::uint16_t total_students,
-        const std::vector<const Course*>& available_courses);
+        const std::vector<Course::Ref>& available_courses);
 
 void print_all_students_courses(const std::vector<Student>& students_list);
 

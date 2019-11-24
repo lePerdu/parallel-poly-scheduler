@@ -11,10 +11,10 @@ struct Section {
      * TODO Use some form of ID instead of pointers for easier transport between
      * MPI nodes?
      */
-    const Course* course;
+    Course::Ref course;
     ClassLayout layout;
 
-    Section(const Course* course, ClassLayout layout);
+    Section(Course::Ref course, ClassLayout layout);
 
     bool overlaps(const Section& other) const;
 
