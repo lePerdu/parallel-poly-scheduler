@@ -3,6 +3,7 @@
 
 #include "course.hpp"
 
+#include <unordered_map>
 #include <vector>
 
 /*
@@ -26,9 +27,18 @@
  */
 constexpr size_t TOTAL_CREDITS_POSSIBLE = 120;
 
+/**
+ * Number of credits each student wants to take for this semester.
+ */
+constexpr size_t SEMESTER_CREDITS = 15;
+
 struct Student {
-    Student(std::uint16_t student_id, std::vector<Course::Ref> taken_courses) :
-        student_id(student_id), taken_courses(taken_courses) {}
+    Student(std::uint16_t student_id,
+            std::vector<Course::Ref> taken_courses,
+            std::vector<Course::Ref> wanted_courses) :
+        student_id(student_id),
+        taken_courses(taken_courses),
+        wanted_courses(wanted_courses) {}
 
     /**
      * Added for more clarity in the print function.
@@ -37,11 +47,15 @@ struct Student {
      */
     std::uint16_t student_id;
     std::vector<Course::Ref> taken_courses;
+    std::vector<Course::Ref> wanted_courses;
 };
 
 std::vector<Student> generate_random_students(
         std::uint16_t total_students,
         const std::vector<Course::Ref>& available_courses);
+
+std::unordered_map<Course::Ref, std::uint8_t> required_course_counts(
+        std::size_t class_capacity, const std::vector<Student>& students);
 
 void print_all_students_courses(const std::vector<Student>& students_list);
 

@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <iostream>
 #include <random>
+#include <unordered_set>
 
 /**
  * Generates a student with random set of taken courses
@@ -58,7 +59,33 @@ static Student generate_taken_courses(
         }
     }
 
-    return {student_id, taken_courses};
+    const int wanted_max_credits =
+            std::min(TOTAL_CREDITS_POSSIBLE - taken_credits, SEMESTER_CREDITS);
+    int wanted_credits = 0;
+
+    // Most courses have 3 credits, so max_assigned_credits / 3 is a good
+    // estimate for how large the vector will get (it can still grow if it
+    // needs to)
+    std::vector<Course::Ref> wanted_courses;
+    wanted_courses.reserve(wanted_max_credits / 3);
+
+    // TODO This also may take a long time depending on how many courses
+    // there are in taken_courses
+    while (wanted_credits < wanted_max_credits) {
+        auto chosen_course =
+                available_courses.at(randomly_assigned_course(rng));
+
+        // Only add it if not already taken
+        if (std::find(
+                    taken_courses.begin(),
+                    taken_courses.end(),
+                    chosen_course) == taken_courses.end()) {
+            wanted_credits += chosen_course->get_credits();
+            wanted_courses.push_back(chosen_course);
+        }
+    }
+
+    return {student_id, taken_courses, wanted_courses};
 }
 
 std::vector<Student> generate_random_students(
@@ -67,10 +94,35 @@ std::vector<Student> generate_random_students(
     // Create a list of all students based on the inputted number of students
     std::vector<Student> students_list;
     for (std::uint16_t i = 0; i < total_students; i++) {
-        students_list.push_back(generate_taken_courses(i, available_courses));
+        students_list.emplace_back(
+                generate_taken_courses(i, available_courses));
     }
 
     return students_list;
+}
+
+std::unordered_map<Course::Ref, std::uint8_t> required_course_counts(
+        std::size_t class_capacity, const std::vector<Student>& students) {
+    // Number of students wanting each course
+    std::unordered_multiset<Course::Ref> course_counts;
+
+    for (auto& student : students) {
+        for (auto course : student.wanted_courses) {
+            course_counts.insert(course);
+        }
+    }
+
+    std::unordered_map<Course::Ref, std::uint8_t> section_counts;
+    section_counts.reserve(course_counts.size());
+    for (auto course : course_counts) {
+        const auto count = course_counts.count(course);
+        // ceil(count / capacity)
+        const std::uint8_t full_sects =
+                count / class_capacity + (count % class_capacity) ? 1 : 0;
+        section_counts.insert({course, full_sects});
+    }
+
+    return section_counts;
 }
 
 // Prints all students along with their generated courses
