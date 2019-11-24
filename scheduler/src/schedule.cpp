@@ -2,6 +2,7 @@
 
 #include "class_time.hpp"
 
+#include <algorithm>
 #include <cassert>
 #include <iostream>
 #include <iterator>
@@ -9,10 +10,13 @@
 
 Schedule::Schedule(Time start, Time end) : start_time(start), end_time(end) {}
 
-Schedule::Schedule(Time start, Time end, const std::vector<Section>& sections) :
-    Schedule(start, end) {
-    for (auto& s : sections) {
-        this->sections.insert({s.course, s});
+Schedule::Schedule(
+        Time start,
+        Time end,
+        std::unordered_map<Course::Ref, std::uint8_t> course_counts) :
+    start_time(start), end_time(end) {
+    for (auto& item : course_counts) {
+        add_random_sections(item.first, item.second);
     }
 }
 
@@ -62,8 +66,8 @@ void Schedule::add_random_section(Course::Ref course) {
     }
 }
 
-void Schedule::add_random_sections(Course::Ref course, std::size_t count) {
-    for (std::size_t i = 0; i < count; ++i) {
+void Schedule::add_random_sections(Course::Ref course, unsigned count) {
+    for (unsigned i = 0; i < count; ++i) {
         add_random_section(course);
     }
 }
@@ -76,6 +80,73 @@ void Schedule::mutate() {
     auto it = sections.begin();
     std::advance(it, rand_section_idx(rng));
     it->second = make_random_section(it->second.course);
+}
+
+std::vector<const Section*>
+Schedule::gen_student_schedule(const Student& student) const {
+    const auto wanted_count = student.wanted_courses.size();
+    std::vector<const Section*> schedule;
+    schedule.reserve(wanted_count);
+
+    std::vector<const Section*> best_schedule;
+    best_schedule.reserve(wanted_count);
+
+    build_student_schedule(student, 0, schedule, best_schedule);
+    return best_schedule;
+}
+
+unsigned Schedule::fitness_score(const std::vector<Student>& students) const {
+    unsigned score = 0;
+    for (auto& student : students) {
+        score += gen_student_schedule(student).size();
+    }
+
+    return score;
+}
+
+void Schedule::build_student_schedule(
+        const Student& student,
+        size_t wanted_idx,
+        std::vector<const Section*>& schedule,
+        std::vector<const Section*>& best) const {
+    if (wanted_idx >= student.wanted_courses.size()) {
+        if (schedule.size() > best.size()) {
+            best = schedule;
+        }
+        return;
+    }
+
+    // Early exit if all wanted courses are in the best one
+    if (best.size() >= student.wanted_courses.size()) {
+        return;
+    }
+
+    // Early exit if the current schedule line could not possibly get better
+    // than best.
+    if (student.wanted_courses.size() - wanted_idx + schedule.size() <=
+        best.size()) {
+        return;
+    }
+
+    const auto course = student.wanted_courses[wanted_idx];
+
+    const auto course_range = sections.equal_range(course);
+    for (auto it = course_range.first; it != course_range.second; ++it) {
+        // Only add it if there are no conflicts
+        const bool can_add = std::none_of(
+                schedule.begin(), schedule.end(), [&](const Section* sect) {
+                    return sect->overlaps(it->second);
+                });
+
+        if (can_add) {
+            schedule.push_back(&it->second);
+            build_student_schedule(student, wanted_idx + 1, schedule, best);
+            schedule.pop_back();
+        }
+    }
+
+    // Also try without this course
+    build_student_schedule(student, wanted_idx + 1, schedule, best);
 }
 
 void Schedule::print() const {

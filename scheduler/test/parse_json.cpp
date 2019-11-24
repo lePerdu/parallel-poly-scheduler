@@ -13,7 +13,7 @@ int main(int argc, char* argv[]) {
     ParseJson parseMajor(FILE_NAME);
     courseList = parseMajor.get_course_list();
 
-    for (int i = 0; i < courseList.size(); i++) {
+    for (std::size_t i = 0; i < courseList.size(); i++) {
         courseList.at(i).print_course();
     }
     return 0;

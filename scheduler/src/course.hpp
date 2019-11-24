@@ -21,7 +21,7 @@ public:
             base(base), offset(offset) {}
 
         const Course* operator->() const {
-            return &base[offset];
+            return get_ptr();
         }
 
         const Course* get_base() const {
@@ -30,6 +30,10 @@ public:
 
         std::size_t get_offset() const {
             return offset;
+        }
+
+        const Course* get_ptr() const {
+            return &base[offset];
         }
 
         /**
@@ -86,6 +90,18 @@ private:
     std::string name;
     std::uint8_t credits;
     std::vector<Ref> prereqs;
+};
+
+/**
+ * Implementation of std::hash() so CourseRef can be used in unordered
+ * maps/sets.
+ */
+template <>
+struct std::hash<Course::Ref> {
+    std::size_t operator()(const Course::Ref& ref) const {
+        // Hash same as pointers
+        return reinterpret_cast<std::size_t>(ref.get_ptr());
+    }
 };
 
 #endif // COURSE_HPP_
