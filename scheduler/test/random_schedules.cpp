@@ -11,10 +11,10 @@ int main(int argc, char* argv[]) {
 
     // This is kinda annoying. Maybe have generate_random_students take the
     // vector a assume that poitners into it will not change?
-    std::vector<const Course*> course_pointers;
+    std::vector<Course::Ref> course_pointers;
     course_pointers.reserve(available_courses.size());
-    for (const auto& c : available_courses) {
-        course_pointers.push_back(&c);
+    for (std::size_t i = 0; i < available_courses.size(); ++i) {
+        course_pointers.emplace_back(available_courses.data(), i);
     }
 
     // Create a List of students based on the number of students and the list of
