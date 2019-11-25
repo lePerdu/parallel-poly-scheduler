@@ -21,7 +21,7 @@ std::unordered_map<Course::Ref, std::uint8_t> required_course_counts(
         const auto count = course_counts.count(course);
         // ceil(count / capacity)
         const std::uint8_t full_sects =
-                count / class_capacity + (count % class_capacity) ? 1 : 0;
+                count / class_capacity + ((count % class_capacity) ? 1 : 0);
         section_counts.insert({course, full_sects});
     }
 
