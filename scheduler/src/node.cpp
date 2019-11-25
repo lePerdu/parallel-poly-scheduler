@@ -2,6 +2,10 @@
 
 #include "mpi_types.hpp"
 
+#include <algorithm>
+
+constexpr unsigned CLASS_CAPACITY = 30;
+
 enum : int {
     SECTION_INFO_TAG,
     SCHEDULE_INFO_TAG,
@@ -12,6 +16,16 @@ Node::Node(int rank) {
     this->rank = rank;
 }
 
+std::ostream& Node::logstream() const {
+    if (rank == MASTER) {
+        std::cout << "[MASTER] ";
+    } else {
+        std::cout << "[WORKER " << rank << "] ";
+    }
+
+    return std::cout;
+}
+
 void Node::start_node_work() {
     // Extract courses from JSON File and save as a vector of course pointers
     if (rank == MASTER)
@@ -20,12 +34,43 @@ void Node::start_node_work() {
     broadcast_course_list();
     broadcast_student_list();
 
-    if (rank == 1) {
-        for (auto& course : available_courses) {
-            course.print();
+    if (rank == MASTER) {
+        logstream() << "Done broadasting courses and students" << std::endl;
+    }
+
+    /* Have each node generate a random schedule and send it to master */
+    if (rank != MASTER) {
+        Schedule schedule(
+                8 * 2,
+                18 * 2,
+                required_course_counts(CLASS_CAPACITY, students));
+
+        const float score = schedule.fitness_score(students);
+        send_schedule(schedule, score, MASTER);
+    } else {
+        int node_count;
+        MPI_Comm_size(MPI_COMM_WORLD, &node_count);
+
+        std::vector<std::pair<Schedule, float>> population;
+        for (int node = 1; node < node_count; ++node) {
+            population.push_back(recv_schedule(node));
         }
 
-        print_all_students_courses(students);
+        for (std::size_t i = 0; i < population.size(); ++i) {
+            logstream() << "Node: " << (i + 1)
+                        << "\tScore: " << population[i].second << std::endl;
+        }
+
+        // Sort with the best at the front
+        std::sort(
+                population.begin(),
+                population.end(),
+                [](std::pair<Schedule, float> a, std::pair<Schedule, float> b) {
+                    return a.second > b.second;
+                });
+
+        population[0].first.print();
+        std::cout << "Score: " << population[0].second << std::endl;
     }
 }
 
@@ -154,8 +199,93 @@ void Node::broadcast_student_list() {
                     student_info.id, taken_course_list, wanted_course_list);
         }
     }
+}
 
-    if (rank == 1) {
-        print_all_students_courses(students);
+void Node::send_section(const Section& section, int dest) const {
+    auto& layout_times = section.layout.get_times();
+    const SectionInfo info{section.course.get_offset(), {layout_times.size()}};
+
+    MPI_Ssend(
+            &info, 1, SECTION_INFO_MPI, dest, SECTION_INFO_TAG, MPI_COMM_WORLD);
+
+    MPI_Ssend(
+            layout_times.data(),
+            layout_times.size(),
+            CLASS_TIME_MPI,
+            dest,
+            CLASS_TIMES_TAG,
+            MPI_COMM_WORLD);
+}
+
+Section Node::recv_section(int source) const {
+    // TODO Actually check this
+    MPI_Status status;
+    SectionInfo info;
+
+    MPI_Recv(
+            &info,
+            1,
+            SECTION_INFO_MPI,
+            source,
+            SECTION_INFO_TAG,
+            MPI_COMM_WORLD,
+            &status);
+
+    std::vector<ClassTime> times(info.layout_info.times_size);
+    MPI_Recv(
+            times.data(),
+            times.size(),
+            CLASS_TIME_MPI,
+            source,
+            CLASS_TIMES_TAG,
+            MPI_COMM_WORLD,
+            &status);
+
+    return {make_course_ref(info.course_index), times};
+}
+
+void Node::send_schedule(
+        const Schedule& schedule, float score, int dest) const {
+    auto& sections = schedule.get_sections();
+    const ScheduleInfo info{schedule.get_start_time(),
+                            schedule.get_end_time(),
+                            score,
+                            sections.size()};
+
+    MPI_Ssend(
+            &info,
+            1,
+            SCHEDULE_INFO_MPI,
+            dest,
+            SCHEDULE_INFO_TAG,
+            MPI_COMM_WORLD);
+
+    for (auto& sect : sections) {
+        // Each section stores which course it is for, so we don't need to send
+        // it
+        send_section(sect.second, dest);
     }
+}
+
+std::pair<Schedule, float> Node::recv_schedule(int source) const {
+    MPI_Status status; // TODO Actually check the status
+    ScheduleInfo info;
+
+    MPI_Recv(
+            &info,
+            1,
+            SCHEDULE_INFO_MPI,
+            source,
+            SCHEDULE_INFO_TAG,
+            MPI_COMM_WORLD,
+            &status);
+
+    Schedule schedule(info.start_time, info.end_time);
+
+    for (std::size_t i = 0; i < info.sections_size; ++i) {
+        auto sect = recv_section(source);
+        schedule.add_section(sect);
+    }
+
+    return {schedule, info.score};
 }

@@ -50,6 +50,10 @@ const Schedule::SectionContainer& Schedule::get_sections() const {
     return sections;
 }
 
+void Schedule::add_section(Section section) {
+    sections.insert({section.course, section});
+}
+
 Section Schedule::make_random_section(Course::Ref course) const {
     auto layout =
             random_class_layout(course->get_credits(), start_time, end_time);
@@ -59,7 +63,7 @@ Section Schedule::make_random_section(Course::Ref course) const {
 void Schedule::add_random_section(Course::Ref course) {
     auto s = make_random_section(course);
     if (!s.layout.empty()) {
-        sections.insert({course, s});
+        add_section(s);
     } else {
         std::cerr << "Empty layout for credits "
                   << (unsigned)course->get_credits() << std::endl;
@@ -95,13 +99,16 @@ Schedule::gen_student_schedule(const Student& student) const {
     return best_schedule;
 }
 
-unsigned Schedule::fitness_score(const std::vector<Student>& students) const {
-    unsigned score = 0;
+float Schedule::fitness_score(const std::vector<Student>& students) const {
+    float score = 0.0;
     for (auto& student : students) {
-        score += gen_student_schedule(student).size();
+        const float proportion =
+                static_cast<float>(gen_student_schedule(student).size()) /
+                student.wanted_courses.size();
+        score += proportion * proportion;
     }
 
-    return score;
+    return score / students.size();
 }
 
 void Schedule::build_student_schedule(

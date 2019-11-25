@@ -59,8 +59,7 @@ void init_mpi_types() {
     // StudentInfo
     {
         const int blocks[] = {1, 1, 1};
-        const MPI_Datatype types[] = {
-                MPI_UNSIGNED, SIZE_T_MPI, SIZE_T_MPI};
+        const MPI_Datatype types[] = {MPI_UNSIGNED, SIZE_T_MPI, SIZE_T_MPI};
         const MPI_Aint displacements[] = {
                 offsetof(StudentInfo, id),
                 offsetof(StudentInfo, taken_courses_size),
@@ -94,25 +93,27 @@ void init_mpi_types() {
 
     // ScheduleInfo
     {
-        const int blocks[] = {1, 1, 1};
-        const MPI_Datatype types[] = {TIME_MPI, TIME_MPI, SIZE_T_MPI};
+        const int blocks[] = {1, 1, 1, 1};
+        const MPI_Datatype types[] = {
+                TIME_MPI, TIME_MPI, MPI_FLOAT, SIZE_T_MPI};
         const MPI_Aint displacements[] = {
                 offsetof(ScheduleInfo, start_time),
                 offsetof(ScheduleInfo, end_time),
+                offsetof(ScheduleInfo, score),
                 offsetof(ScheduleInfo, sections_size),
         };
 
         MPI_Type_create_struct(
-                3, blocks, displacements, types, &SCHEDULE_INFO_MPI);
+                4, blocks, displacements, types, &SCHEDULE_INFO_MPI);
         MPI_Type_commit(&SCHEDULE_INFO_MPI);
     }
 }
 
 void free_mpi_types() {
-     MPI_Type_free(&CLASS_TIME_MPI);
-     MPI_Type_free(&COURSE_INFO_MPI);
-     MPI_Type_free(&STUDENT_INFO_MPI);
-     MPI_Type_free(&CLASS_LAYOUT_INFO_MPI);
-     MPI_Type_free(&SECTION_INFO_MPI);
-     MPI_Type_free(&SCHEDULE_INFO_MPI);
+    MPI_Type_free(&CLASS_TIME_MPI);
+    MPI_Type_free(&COURSE_INFO_MPI);
+    MPI_Type_free(&STUDENT_INFO_MPI);
+    MPI_Type_free(&CLASS_LAYOUT_INFO_MPI);
+    MPI_Type_free(&SECTION_INFO_MPI);
+    MPI_Type_free(&SCHEDULE_INFO_MPI);
 }

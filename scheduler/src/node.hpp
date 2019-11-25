@@ -32,6 +32,14 @@ private:
     void broadcast_course_list();
     void broadcast_student_list();
 
+    void send_section(const Section& section, int dest) const;
+    Section recv_section(int source) const;
+
+    void send_schedule(const Schedule& schedule, float score, int dest) const;
+    std::pair<Schedule, float> recv_schedule(int source) const;
+
+    std::ostream& logstream() const;
+
 public:
     Node(int rank);
     void start_node_work();

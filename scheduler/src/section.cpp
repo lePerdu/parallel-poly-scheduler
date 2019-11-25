@@ -10,7 +10,8 @@ bool Section::overlaps(const Section& other) const {
 }
 
 void Section::print() const {
-    std::cout << course->get_name() << ':' << std::endl;
+    std::cout << course->get_name() << " [" << course->get_id()
+              << "] :" << std::endl;
     for (auto& time : layout.get_times()) {
         std::cout << '\t';
         time.print();

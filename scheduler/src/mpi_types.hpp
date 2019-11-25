@@ -42,6 +42,7 @@ struct SectionInfo {
 struct ScheduleInfo {
     Time start_time;
     Time end_time;
+    float score; // Can be set to 0 if unkown / not needed
     std::size_t sections_size;
 };
 
