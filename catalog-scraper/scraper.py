@@ -71,6 +71,7 @@ def scrape_major_catalog(session, catalog_id, program_id):
         dep, number = course_name.split(' ')
 
         courses[course_id] = {
+            'id': course_id,
             'department': dep,
             'number': number,
             'title': title.strip(),
@@ -84,6 +85,7 @@ def scrape_catalog_and_prereqs(catalog_id, program_id):
     with requests.Session() as session:
         courses = scrape_major_catalog(session, catalog_id, program_id)
 
+        # TODO Download prereq info asynchronously to save time
         for course_id, course in courses.items():
             prereqs = scrape_course_prereqs(session, catalog_id, course_id)
 

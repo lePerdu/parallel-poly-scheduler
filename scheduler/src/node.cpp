@@ -26,7 +26,7 @@ Node::Node(std::uint8_t rank) {
 void Node::start_node_work() {
     // Extract courses from JSON File and save as a vector of course pointers
     if (rank == MASTER)
-        setup(available_courses, course_pointers);
+        setup(available_courses, students);
 
     broadcast_course_list();
 
@@ -37,18 +37,20 @@ void Node::broadcast_course_list() {
     // Send how long the course list is
     std::size_t course_list_size;
     if (rank == MASTER)
-        course_list_size = course_pointers.size();
+        course_list_size = available_courses.size();
     MPI_Bcast(&course_list_size, 1, MPI_UNSIGNED_LONG, MASTER, MPI_COMM_WORLD);
 
     // Iterate through the course list
     for (std::size_t i = 0; i < course_list_size; i++) {
+        unsigned course_id;
         std::string course_name = "";
         std::uint8_t credits;
         std::size_t size_of_course_name;
 
         if (rank == MASTER) {
-            course_name = course_pointers[i]->get_name();
-            credits = course_pointers[i]->get_credits();
+            course_id = available_courses[i].get_id();
+            course_name = available_courses[i].get_name();
+            credits = available_courses[i].get_credits();
             size_of_course_name = course_name.length() + 1;
             printf("[MASTER] ---- Sending Course: %s\tCredits: %d\n",
                    course_name.c_str(),
@@ -96,19 +98,16 @@ void Node::broadcast_course_list() {
         }
 
         if (rank != MASTER) {
-            available_courses.emplace_back(course_name, credits);
-            // Address of the last one pushed
-            course_pointers.emplace_back(
-                    available_courses.data(), available_courses.size() - 1);
+            available_courses.emplace_back(course_id, course_name, credits);
         }
     }
 
     if (rank == 1) {
-        for (std::size_t i = 0; i < course_pointers.size(); i++) {
-            // Will output strange chars at the front of the course_pointers but
-            // correct at the end... Not sure what is up with this? -> non
+        for (std::size_t i = 0; i < available_courses.size(); i++) {
+            // Will output strange chars at the front of the available_courses
+            // but correct at the end... Not sure what is up with this? -> non
             // pointers work
-            // course_pointers[i]->print_course();
+            // available_courses[i]->print_course();
             available_courses[i].print_course();
         }
     }
@@ -120,10 +119,10 @@ void Node::broadcast_student_list() {
     std::size_t student_list_size;
 
     if (rank == MASTER) {
-        students = generate_random_students(TOTALSTUDENTS, course_pointers);
         student_list_size = students.size();
         printf("Student list size: %ld\n", student_list_size);
     }
+
     // Send how many students to expect
     MPI_Bcast(&student_list_size, 1, MPI_UNSIGNED_LONG, MASTER, MPI_COMM_WORLD);
 
