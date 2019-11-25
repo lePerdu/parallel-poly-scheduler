@@ -19,14 +19,6 @@ std::uint8_t Course::get_credits() const {
     return credits;
 }
 
-void Course::add_prereq(Course::Ref prereq) {
-    prereqs.push_back(prereq);
-}
-
-bool Course::has_prereq(Course::Ref prereq) const {
-    return std::find(prereqs.begin(), prereqs.end(), prereq) != prereqs.end();
-}
-
 void Course::print_course() const {
     std::cout << "Course Title: [" << name << "]"
               << "\t"

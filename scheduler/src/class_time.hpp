@@ -5,7 +5,7 @@
 #include <iterator>
 #include <vector>
 
-enum Day { MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY };
+enum Day : std::int8_t { MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY };
 
 /**
  * Time is stored as an index from the start of the day.
@@ -22,6 +22,7 @@ struct ClassTime {
     Time start;
     Time end;
 
+    ClassTime();
     ClassTime(Day day, Time start, Time end);
 
     bool overlaps(const ClassTime& other) const;

@@ -32,11 +32,18 @@ std::unordered_map<Course::Ref, std::uint8_t> required_course_counts(
 void print_all_students_courses(const std::vector<Student>& students_list) {
     for (std::size_t i = 0; i < students_list.size(); i++) {
         const auto& printing_student = students_list.at(i);
-        std::cout << "Student ID: [" << printing_student.student_id << "]"
-                  << std::endl;
+        std::cout << "Student ID: [" << printing_student.id << "]" << std::endl
+                  << "Taken courses:" << std::endl;
         for (auto& course : printing_student.taken_courses) {
             course->print_course();
         }
+
+        std::cout << "Wanted courses:" << std::endl;
+
+        for (auto& course : printing_student.wanted_courses) {
+            course->print_course();
+        }
+
         std::cout << std::endl;
     }
 }

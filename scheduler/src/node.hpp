@@ -23,15 +23,17 @@
 
 class Node {
 private:
-    std::uint8_t rank;
+    int rank;
     std::vector<Course> available_courses;
     std::vector<Student> students;
+
+    Course::Ref make_course_ref(std::size_t index) const;
 
     void broadcast_course_list();
     void broadcast_student_list();
 
 public:
-    Node(std::uint8_t rank);
+    Node(int rank);
     void start_node_work();
 };
 

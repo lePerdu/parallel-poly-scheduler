@@ -33,10 +33,10 @@ constexpr size_t TOTAL_CREDITS_POSSIBLE = 120;
 constexpr size_t SEMESTER_CREDITS = 15;
 
 struct Student {
-    Student(unsigned student_id,
+    Student(unsigned id,
             std::vector<Course::Ref> taken_courses,
             std::vector<Course::Ref> wanted_courses) :
-        student_id(student_id),
+        id(id),
         taken_courses(taken_courses),
         wanted_courses(wanted_courses) {}
 
@@ -45,7 +45,7 @@ struct Student {
      *
      * May be removed later.
      */
-    unsigned student_id;
+    unsigned id;
     std::vector<Course::Ref> taken_courses;
     std::vector<Course::Ref> wanted_courses;
 };

@@ -85,15 +85,12 @@ public:
     const std::string& get_name() const;
     std::uint8_t get_credits() const;
 
-    void add_prereq(Ref prereq);
-    bool has_prereq(Ref prereq) const;
     void print_course() const;
 
 private:
     unsigned id;
     std::string name;
     std::uint8_t credits;
-    std::vector<Ref> prereqs;
 };
 
 /**

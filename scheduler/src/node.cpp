@@ -1,25 +1,14 @@
 #include "node.hpp"
 
-/*
- *===================== TODO ========================
- * 1. broadcast_student_list();
- * Correctly save the courses to the student
- * Possible corruption / overwritten from
- * pointer in std::vector<Course::Ref> taken_courses) ?
- *
- * 2. Refactor broadcast_student_list() to
- * incorporate broadcasst_course_list() when sending
- * student's courses,
- *
- * Possible fixes:
- * 1. Change taken_courses from vector<Course::Ref>
- * to vector<const Course>
- *
- * 2. --
- * ===================================================
- */
+#include "mpi_types.hpp"
 
-Node::Node(std::uint8_t rank) {
+enum : int {
+    SECTION_INFO_TAG,
+    SCHEDULE_INFO_TAG,
+    CLASS_TIMES_TAG,
+};
+
+Node::Node(int rank) {
     this->rank = rank;
 }
 
@@ -29,8 +18,11 @@ void Node::start_node_work() {
         setup(available_courses, students);
 
     broadcast_course_list();
-
     broadcast_student_list();
+}
+
+Course::Ref Node::make_course_ref(std::size_t index) const {
+    return {available_courses.data(), index};
 }
 
 void Node::broadcast_course_list() {
@@ -38,77 +30,64 @@ void Node::broadcast_course_list() {
     std::size_t course_list_size;
     if (rank == MASTER)
         course_list_size = available_courses.size();
-    MPI_Bcast(&course_list_size, 1, MPI_UNSIGNED_LONG, MASTER, MPI_COMM_WORLD);
+    MPI_Bcast(&course_list_size, 1, SIZE_T_MPI, MASTER, MPI_COMM_WORLD);
 
     // Iterate through the course list
     for (std::size_t i = 0; i < course_list_size; i++) {
-        unsigned course_id;
-        std::string course_name = "";
-        std::uint8_t credits;
-        std::size_t size_of_course_name;
+        // Send the course ID, credits, and the size of the name in a single
+        // packed message
+
+        CourseInfo course_info;
+        std::string course_name;
 
         if (rank == MASTER) {
-            course_id = available_courses[i].get_id();
-            course_name = available_courses[i].get_name();
-            credits = available_courses[i].get_credits();
-            size_of_course_name = course_name.length() + 1;
-            printf("[MASTER] ---- Sending Course: %s\tCredits: %d\n",
-                   course_name.c_str(),
-                   credits);
+            auto& course = available_courses[i];
+            course_info = {
+                    course.get_id(),
+                    course.get_credits(),
+                    course.get_name().size(),
+            };
+            std::cout << "[MASTER] ---- Sending Course: " << course.get_name()
+                      << "\tCredits: "
+                      << static_cast<unsigned>(course_info.credits)
+                      << std::endl;
         }
 
-        // Broadcast to all nodes..
-        //      Credits, Size of Course Name, and the Name of Course
-        MPI_Bcast(&credits, 1, MPI_UNSIGNED_CHAR, MASTER, MPI_COMM_WORLD);
-        MPI_Bcast(
-                &size_of_course_name,
-                1,
-                MPI_UNSIGNED_LONG,
-                MASTER,
-                MPI_COMM_WORLD);
-        for (std::size_t j = 0; j < size_of_course_name; j++) {
-            char char_name;
-            if (rank == MASTER)
-                char_name = course_name[j];
+        // Boradcast is the same for both
+        MPI_Bcast(&course_info, 1, COURSE_INFO_MPI, MASTER, MPI_COMM_WORLD);
 
-            MPI_Bcast(&char_name, 1, MPI_CHAR, MASTER, MPI_COMM_WORLD);
-
-            if (rank != MASTER)
-                course_name += char_name;
-        }
+        // Send the name as a separate message
 
         if (rank == MASTER) {
+            // Just send the string's buffer
+            auto& name = available_courses[i].get_name();
             MPI_Bcast(
-                    &course_name[0],
-                    size_of_course_name,
+                    // Safe to cast away const since it is just sending here
+                    (void*)name.data(),
+                    course_info.name_size,
                     MPI_CHAR,
                     MASTER,
                     MPI_COMM_WORLD);
         } else {
-            // Allocate a temporary buffer to read the name into
-            char* buffer = new char[size_of_course_name];
+            // TODO Allocate this once rather than re-allocating for each course
+            char* name_buf = new char[course_info.name_size];
             MPI_Bcast(
-                    buffer,
-                    size_of_course_name,
+                    name_buf,
+                    course_info.name_size,
                     MPI_CHAR,
                     MASTER,
                     MPI_COMM_WORLD);
-            course_name = buffer;
-            delete[] buffer;
-        }
+            course_name = std::string(name_buf, course_info.name_size);
+            delete[] name_buf;
 
-        if (rank != MASTER) {
-            available_courses.emplace_back(course_id, course_name, credits);
+            available_courses.emplace_back(
+                    course_info.id, course_name, course_info.credits);
         }
     }
 
     if (rank == 1) {
-        for (std::size_t i = 0; i < available_courses.size(); i++) {
-            // Will output strange chars at the front of the available_courses
-            // but correct at the end... Not sure what is up with this? -> non
-            // pointers work
-            // available_courses[i]->print_course();
-            available_courses[i].print_course();
+        for (auto& course : available_courses) {
+            course.print_course();
         }
     }
 }
@@ -120,44 +99,73 @@ void Node::broadcast_student_list() {
 
     if (rank == MASTER) {
         student_list_size = students.size();
-        printf("Student list size: %ld\n", student_list_size);
+        std::cout << "Student list size: " << student_list_size << std::endl;
     }
 
     // Send how many students to expect
-    MPI_Bcast(&student_list_size, 1, MPI_UNSIGNED_LONG, MASTER, MPI_COMM_WORLD);
+    MPI_Bcast(&student_list_size, 1, SIZE_T_MPI, MASTER, MPI_COMM_WORLD);
 
     for (std::size_t i = 0; i < student_list_size; i++) {
-        std::uint16_t student_id;
-        std::size_t taken_courses_list_size;
+        StudentInfo student_info;
         std::vector<Course::Ref> taken_course_list;
-        std::vector<Course::Ref>* taken_course_list_ptr = &taken_course_list;
+        std::vector<Course::Ref> wanted_course_list;
 
         if (rank == MASTER) {
-            student_id = students[i].student_id;
-            taken_course_list_ptr = &students[i].taken_courses;
-            taken_courses_list_size = taken_course_list_ptr->size();
+            student_info.id = students[i].id;
+            student_info.taken_courses_size = students[i].taken_courses.size();
+            student_info.wanted_courses_size =
+                    students[i].wanted_courses.size();
         }
 
-        // Broadcast Student ID and how many Courses to expect
-        MPI_Bcast(&student_id, 1, MPI_UNSIGNED_SHORT, MASTER, MPI_COMM_WORLD);
-        MPI_Bcast(
-                &taken_courses_list_size,
-                1,
-                MPI_UNSIGNED_LONG,
-                MASTER,
-                MPI_COMM_WORLD);
+        // Broadcast Student ID and how many courses to expect
+        MPI_Bcast(&student_info, 1, STUDENT_INFO_MPI, MASTER, MPI_COMM_WORLD);
 
-        // Part to be refactored later -> using broadcast_course();
-        for (std::size_t j = 0; j < taken_courses_list_size; j++) {
+        // Send taken courses
+        for (std::size_t j = 0; j < student_info.taken_courses_size; j++) {
             // Only send the index of the course
-            unsigned long offset; // Should be equivalent to size_t
+            std::size_t offset;
             if (rank == MASTER) {
                 const auto& course = students[i].taken_courses[j];
                 auto& course_name = course->get_name();
                 auto credits = course->get_credits();
-                printf("[MASTER] ---- Sending Course From Student: "
+                printf("[MASTER] ---- Sending taken course from student: "
                        "%d\t%s\tCredits: %d\n",
-                       student_id,
+                       student_info.id,
+                       course_name.c_str(),
+                       credits);
+
+                offset = course.get_offset();
+            }
+
+            // Broadcast offset of taken course
+            MPI_Bcast(&offset, 1, SIZE_T_MPI, MASTER, MPI_COMM_WORLD);
+
+            if (rank != MASTER) {
+                taken_course_list.push_back(make_course_ref(offset));
+
+                if (rank == 1) {
+                    const auto& course = taken_course_list.back();
+                    printf("[WORKER %d] ---- Adding taken course to student: "
+                           "%d\t%s\tCredits: %d\n",
+                           rank,
+                           student_info.id,
+                           course->get_name().c_str(),
+                           course->get_credits());
+                }
+            }
+        }
+
+        // Send wanted courses
+        for (std::size_t j = 0; j < student_info.wanted_courses_size; j++) {
+            // Only send the index of the course
+            std::size_t offset;
+            if (rank == MASTER) {
+                const auto& course = students[i].wanted_courses[j];
+                auto& course_name = course->get_name();
+                auto credits = course->get_credits();
+                printf("[MASTER] ---- Sending wanted course from student: "
+                       "%d\t%s\tCredits: %d\n",
+                       student_info.id,
                        course_name.c_str(),
                        credits);
 
@@ -165,26 +173,30 @@ void Node::broadcast_student_list() {
             }
 
             // Broadcast Credits, Size of Course Name, and the Name of Course
-            MPI_Bcast(&offset, 1, MPI_UNSIGNED_LONG, MASTER, MPI_COMM_WORLD);
+            MPI_Bcast(&offset, 1, SIZE_T_MPI, MASTER, MPI_COMM_WORLD);
 
             if (rank != MASTER) {
-                taken_course_list.emplace_back(
-                        available_courses.data(), offset);
+                wanted_course_list.push_back(make_course_ref(offset));
 
                 if (rank == 1) {
-                    const auto& course = taken_course_list.back();
-                    printf("[WORKER %d] ---- Adding Course To Student: "
+                    const auto& course = wanted_course_list.back();
+                    printf("[WORKER %d] ---- Adding wanted course to student: "
                            "%d\t%s\tCredits: %d\n",
                            rank,
-                           student_id,
+                           student_info.id,
                            course->get_name().c_str(),
                            course->get_credits());
                 }
             }
         }
 
-        // problem here? Probably storing
-        if (rank == 1)
-            print_all_students_courses(students);
+        if (rank != MASTER) {
+            students.emplace_back(
+                    student_info.id, taken_course_list, wanted_course_list);
+        }
+    }
+
+    if (rank == 1) {
+        print_all_students_courses(students);
     }
 }

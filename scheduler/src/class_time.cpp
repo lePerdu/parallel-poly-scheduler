@@ -8,6 +8,8 @@
 /// ClassTime
 ///
 
+ClassTime::ClassTime() : day(static_cast<Day>(0)), start(0), end(0) {}
+
 ClassTime::ClassTime(Day day, Time start, Time end) :
     day(day), start(start), end(end) {}
 
