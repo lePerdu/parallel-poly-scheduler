@@ -19,7 +19,7 @@ std::uint8_t Course::get_credits() const {
     return credits;
 }
 
-void Course::print_course() const {
+void Course::print() const {
     std::cout << "Course Title: [" << name << "]"
               << "\t"
               << "Credits: [" << static_cast<unsigned>(credits) << "]"

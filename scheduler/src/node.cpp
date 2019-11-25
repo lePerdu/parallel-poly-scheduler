@@ -19,6 +19,14 @@ void Node::start_node_work() {
 
     broadcast_course_list();
     broadcast_student_list();
+
+    if (rank == 1) {
+        for (auto& course : available_courses) {
+            course.print();
+        }
+
+        print_all_students_courses(students);
+    }
 }
 
 Course::Ref Node::make_course_ref(std::size_t index) const {
@@ -47,10 +55,6 @@ void Node::broadcast_course_list() {
                     course.get_credits(),
                     course.get_name().size(),
             };
-            std::cout << "[MASTER] ---- Sending Course: " << course.get_name()
-                      << "\tCredits: "
-                      << static_cast<unsigned>(course_info.credits)
-                      << std::endl;
         }
 
         // Boradcast is the same for both
@@ -84,12 +88,6 @@ void Node::broadcast_course_list() {
                     course_info.id, course_name, course_info.credits);
         }
     }
-
-    if (rank == 1) {
-        for (auto& course : available_courses) {
-            course.print_course();
-        }
-    }
 }
 
 // Receive Each Course -> Could not get it to work with Broadcast_courses()
@@ -99,7 +97,6 @@ void Node::broadcast_student_list() {
 
     if (rank == MASTER) {
         student_list_size = students.size();
-        std::cout << "Student list size: " << student_list_size << std::endl;
     }
 
     // Send how many students to expect
@@ -125,16 +122,7 @@ void Node::broadcast_student_list() {
             // Only send the index of the course
             std::size_t offset;
             if (rank == MASTER) {
-                const auto& course = students[i].taken_courses[j];
-                auto& course_name = course->get_name();
-                auto credits = course->get_credits();
-                printf("[MASTER] ---- Sending taken course from student: "
-                       "%d\t%s\tCredits: %d\n",
-                       student_info.id,
-                       course_name.c_str(),
-                       credits);
-
-                offset = course.get_offset();
+                offset = students[i].taken_courses[j].get_offset();
             }
 
             // Broadcast offset of taken course
@@ -142,16 +130,6 @@ void Node::broadcast_student_list() {
 
             if (rank != MASTER) {
                 taken_course_list.push_back(make_course_ref(offset));
-
-                if (rank == 1) {
-                    const auto& course = taken_course_list.back();
-                    printf("[WORKER %d] ---- Adding taken course to student: "
-                           "%d\t%s\tCredits: %d\n",
-                           rank,
-                           student_info.id,
-                           course->get_name().c_str(),
-                           course->get_credits());
-                }
             }
         }
 
@@ -160,16 +138,7 @@ void Node::broadcast_student_list() {
             // Only send the index of the course
             std::size_t offset;
             if (rank == MASTER) {
-                const auto& course = students[i].wanted_courses[j];
-                auto& course_name = course->get_name();
-                auto credits = course->get_credits();
-                printf("[MASTER] ---- Sending wanted course from student: "
-                       "%d\t%s\tCredits: %d\n",
-                       student_info.id,
-                       course_name.c_str(),
-                       credits);
-
-                offset = course.get_offset();
+                offset = students[i].wanted_courses[j].get_offset();
             }
 
             // Broadcast Credits, Size of Course Name, and the Name of Course
@@ -177,16 +146,6 @@ void Node::broadcast_student_list() {
 
             if (rank != MASTER) {
                 wanted_course_list.push_back(make_course_ref(offset));
-
-                if (rank == 1) {
-                    const auto& course = wanted_course_list.back();
-                    printf("[WORKER %d] ---- Adding wanted course to student: "
-                           "%d\t%s\tCredits: %d\n",
-                           rank,
-                           student_info.id,
-                           course->get_name().c_str(),
-                           course->get_credits());
-                }
             }
         }
 

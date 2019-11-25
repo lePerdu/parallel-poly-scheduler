@@ -85,7 +85,7 @@ public:
     const std::string& get_name() const;
     std::uint8_t get_credits() const;
 
-    void print_course() const;
+    void print() const;
 
 private:
     unsigned id;

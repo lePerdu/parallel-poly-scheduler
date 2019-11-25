@@ -35,13 +35,13 @@ void print_all_students_courses(const std::vector<Student>& students_list) {
         std::cout << "Student ID: [" << printing_student.id << "]" << std::endl
                   << "Taken courses:" << std::endl;
         for (auto& course : printing_student.taken_courses) {
-            course->print_course();
+            course->print();
         }
 
         std::cout << "Wanted courses:" << std::endl;
 
         for (auto& course : printing_student.wanted_courses) {
-            course->print_course();
+            course->print();
         }
 
         std::cout << std::endl;

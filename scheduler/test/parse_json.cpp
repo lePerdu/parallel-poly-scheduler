@@ -11,7 +11,7 @@ int main(int argc, char* argv[]) {
     setup(course_list, student_list);
 
     for (const auto& c : course_list) {
-        c.print_course();
+        c.print();
     }
 
     return 0;
