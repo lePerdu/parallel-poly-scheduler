@@ -2,6 +2,7 @@
 #define NODES_HPP_
 
 #include "course.hpp"
+#include "schedule.hpp"
 #include "setup.hpp"
 #include "student.hpp"
 
@@ -23,9 +24,8 @@
 class Node {
 private:
     std::uint8_t rank;
-    std::vector<Student> students;
-    std::vector<Course::Ref> course_pointers;
     std::vector<Course> available_courses;
+    std::vector<Student> students;
 
     void broadcast_course_list();
     void broadcast_student_list();

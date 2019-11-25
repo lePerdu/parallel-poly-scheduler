@@ -79,14 +79,18 @@ public:
         std::size_t offset;
     };
 
-    Course(std::string name, std::uint8_t credits);
+    Course(unsigned id, std::string name, std::uint8_t credits);
+
+    unsigned get_id() const;
     const std::string& get_name() const;
     std::uint8_t get_credits() const;
+
     void add_prereq(Ref prereq);
     bool has_prereq(Ref prereq) const;
     void print_course() const;
 
 private:
+    unsigned id;
     std::string name;
     std::uint8_t credits;
     std::vector<Ref> prereqs;

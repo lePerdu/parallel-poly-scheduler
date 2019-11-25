@@ -279,14 +279,5 @@ random_class_layout(std::uint8_t credits, Time start_time, Time end_time) {
     std::default_random_engine rng(rd());
     std::uniform_int_distribution<int> distribution(0, all_layouts.size() - 1);
 
-    auto& l = all_layouts.at(distribution(rng));
-    std::cerr << "Found layout" << std::endl;
-    for (auto& t : l.get_times()) {
-        std::cerr << '\t';
-        t.print();
-    }
-    if (l.get_times().size() <= 0 || l.get_times().size() > 4) {
-        std::cerr << "Invalid layout" << std::endl;
-    }
-    return l;
+    return all_layouts.at(distribution(rng));
 }

@@ -4,8 +4,12 @@
 #include <algorithm>
 #include <iostream>
 
-Course::Course(std::string name, std::uint8_t credits) :
-    name(name), credits(credits) {}
+Course::Course(unsigned id, std::string name, std::uint8_t credits) :
+    id(id), name(name), credits(credits) {}
+
+unsigned Course::get_id() const {
+    return id;
+}
 
 const std::string& Course::get_name() const {
     return name;

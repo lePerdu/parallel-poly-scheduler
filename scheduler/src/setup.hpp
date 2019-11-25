@@ -10,10 +10,6 @@
 #include <string>
 #include <vector>
 
-constexpr std::size_t TOTALSTUDENTS = 10;
-
-extern const char* FILE_NAME;
-
 /*
  * Parses the courses from the list of courses that a
  * CS major student must take && Generates a list of
@@ -21,11 +17,9 @@ extern const char* FILE_NAME;
  */
 
 void setup(
-        std::vector<Course>& available_courses,
-        std::vector<Course::Ref>& course_pointers);
+        std::vector<Course>& available_courses, std::vector<Student>& students);
 
 void extract_courses(
-        std::vector<Course>& available_courses,
-        std::vector<Course::Ref>& course_pointers);
+        std::vector<Course>& available_courses, std::vector<Student>& students);
 
 #endif // SETUP_HPP_
