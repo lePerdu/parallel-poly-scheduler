@@ -203,13 +203,14 @@ void Node::broadcast_student_list() {
 
 void Node::send_section(const Section& section, int dest) const {
     auto& layout_times = section.layout.get_times();
-    const SectionInfo info{section.course.get_offset(), {layout_times.size()}};
+    SectionInfo info{section.course.get_offset(), {layout_times.size()}};
 
     MPI_Ssend(
             &info, 1, SECTION_INFO_MPI, dest, SECTION_INFO_TAG, MPI_COMM_WORLD);
 
     MPI_Ssend(
-            layout_times.data(),
+            // Safe to cast away const since it is only reading
+            (void*) layout_times.data(),
             layout_times.size(),
             CLASS_TIME_MPI,
             dest,
@@ -247,7 +248,7 @@ Section Node::recv_section(int source) const {
 void Node::send_schedule(
         const Schedule& schedule, float score, int dest) const {
     auto& sections = schedule.get_sections();
-    const ScheduleInfo info{schedule.get_start_time(),
+    ScheduleInfo info{schedule.get_start_time(),
                             schedule.get_end_time(),
                             score,
                             sections.size()};

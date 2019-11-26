@@ -119,10 +119,14 @@ private:
 
 // Required for using ClassLayoutGenerator as a key in a hash map
 
+namespace std {
+
 template <>
-struct std::hash<ClassLayoutGenerator> {
-    std::size_t operator()(const ClassLayoutGenerator& gen) const;
+struct hash<ClassLayoutGenerator> {
+    size_t operator()(const ClassLayoutGenerator& gen) const;
 };
+
+}
 
 /**
  * Returns a vector of all class layouts for a given configuration.

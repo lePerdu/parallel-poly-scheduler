@@ -93,16 +93,20 @@ private:
     std::uint8_t credits;
 };
 
+namespace std {
+
 /**
  * Implementation of std::hash() so CourseRef can be used in unordered
  * maps/sets.
  */
 template <>
-struct std::hash<Course::Ref> {
-    std::size_t operator()(const Course::Ref& ref) const {
+struct hash<Course::Ref> {
+    size_t operator()(const Course::Ref& ref) const {
         // Hash same as pointers
-        return reinterpret_cast<std::size_t>(ref.get_ptr());
+        return reinterpret_cast<size_t>(ref.get_ptr());
     }
 };
+
+}
 
 #endif // COURSE_HPP_

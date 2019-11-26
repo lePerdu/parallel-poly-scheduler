@@ -25,10 +25,10 @@ MPI_Datatype SCHEDULE_INFO_MPI;
 void init_mpi_types() {
     // ClassTime
     {
-        const int blocks[] = {1, 1, 1};
-        const MPI_Datatype types[] = {
+        int blocks[] = {1, 1, 1};
+        MPI_Datatype types[] = {
                 MPI_CHAR, MPI_UNSIGNED_CHAR, MPI_UNSIGNED_CHAR};
-        const MPI_Aint displacements[] = {
+        MPI_Aint displacements[] = {
                 offsetof(ClassTime, day),
                 offsetof(ClassTime, start),
                 offsetof(ClassTime, end),
@@ -42,10 +42,10 @@ void init_mpi_types() {
 
     // CourseInfo
     {
-        const int blocks[] = {1, 1, 1};
-        const MPI_Datatype types[] = {
+        int blocks[] = {1, 1, 1};
+        MPI_Datatype types[] = {
                 MPI_UNSIGNED, MPI_UNSIGNED_CHAR, SIZE_T_MPI};
-        const MPI_Aint displacements[] = {
+        MPI_Aint displacements[] = {
                 offsetof(CourseInfo, id),
                 offsetof(CourseInfo, credits),
                 offsetof(CourseInfo, name_size),
@@ -58,9 +58,9 @@ void init_mpi_types() {
 
     // StudentInfo
     {
-        const int blocks[] = {1, 1, 1};
-        const MPI_Datatype types[] = {MPI_UNSIGNED, SIZE_T_MPI, SIZE_T_MPI};
-        const MPI_Aint displacements[] = {
+        int blocks[] = {1, 1, 1};
+        MPI_Datatype types[] = {MPI_UNSIGNED, SIZE_T_MPI, SIZE_T_MPI};
+        MPI_Aint displacements[] = {
                 offsetof(StudentInfo, id),
                 offsetof(StudentInfo, taken_courses_size),
                 offsetof(StudentInfo, wanted_courses_size),
@@ -79,9 +79,9 @@ void init_mpi_types() {
 
     // SectionInfo
     {
-        const int blocks[] = {1, 1};
-        const MPI_Datatype types[] = {SIZE_T_MPI, CLASS_LAYOUT_INFO_MPI};
-        const MPI_Aint displacements[] = {
+        int blocks[] = {1, 1};
+        MPI_Datatype types[] = {SIZE_T_MPI, CLASS_LAYOUT_INFO_MPI};
+        MPI_Aint displacements[] = {
                 offsetof(SectionInfo, course_index),
                 offsetof(SectionInfo, layout_info),
         };
@@ -93,10 +93,10 @@ void init_mpi_types() {
 
     // ScheduleInfo
     {
-        const int blocks[] = {1, 1, 1, 1};
-        const MPI_Datatype types[] = {
+        int blocks[] = {1, 1, 1, 1};
+        MPI_Datatype types[] = {
                 TIME_MPI, TIME_MPI, MPI_FLOAT, SIZE_T_MPI};
-        const MPI_Aint displacements[] = {
+        MPI_Aint displacements[] = {
                 offsetof(ScheduleInfo, start_time),
                 offsetof(ScheduleInfo, end_time),
                 offsetof(ScheduleInfo, score),
