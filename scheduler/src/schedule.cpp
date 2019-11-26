@@ -62,7 +62,7 @@ Section Schedule::make_random_section(Course::Ref course) const {
 
 void Schedule::add_random_section(Course::Ref course) {
     auto s = make_random_section(course);
-    if (!s.layout.empty()) {
+    if (!s.layout.empty() || course->get_credits() == 0) {
         add_section(s);
     } else {
         std::cerr << "Empty layout for credits "

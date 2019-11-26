@@ -147,6 +147,14 @@ const ClassLayout BASE_LAYOUTS_1[] = {
         {},
 };
 
+const ClassLayout BASE_LAYOUTS_2[] = {
+        // MW
+        {ClassTime(Day::MONDAY, 0, 3), ClassTime(Day::WEDNESDAY, 0, 3)},
+        // TR
+        {ClassTime(Day::TUESDAY, 0, 3), ClassTime(Day::THURSDAY, 0, 3)},
+        {},
+};
+
 const ClassLayout BASE_LAYOUTS_3[] = {
         // MWF
         {ClassTime(Day::MONDAY, 0, 2),
@@ -171,6 +179,8 @@ static const ClassLayout* credit_base_layouts(std::uint8_t credits) {
     switch (credits) {
     case 1:
         return BASE_LAYOUTS_1;
+    case 2:
+        return BASE_LAYOUTS_2;
     case 3:
         return BASE_LAYOUTS_3;
     case 4:
